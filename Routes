@@ -1,1 +1,62 @@
+const express = require('express');
+const router = express.Router();
+
+// Mock database for electronic devices
+let devices = [
+    { id: 1, name: "iPhone 15", category: "Smartphone", price: 799, stock: 15 },
+    { id: 2, name: "MacBook Air", category: "Laptop", price: 999, stock: 8 },
+    { id: 3, name: "Sony WH-1000XM5", category: "Headphones", price: 350, stock: 12 }
+];
+
+// READ – Get all devices
+router.get('/', (req, res) => {
+    res.json(devices);
+});
+
+// READ – Get a single device by ID
+router.get('/:id', (req, res) => {
+    const device = devices.find(d => d.id == req.params.id);
+    if (device) {
+        res.json(device);
+    } else {
+        res.status(404).json({ message: "Device not found" });
+    }
+});
+
+// CREATE – Add a new device
+router.post('/', (req, res) => {
+    const newDevice = {
+        id: devices.length > 0 ? devices[devices.length - 1].id + 1 : 1,
+        ...req.body
+    };
+    devices.push(newDevice);
+    res.status(201).json({ message: "Device added successfully", device: newDevice });
+});
+
+// UPDATE – Update device details
+router.put('/:id', (req, res) => {
+    const index = devices.findIndex(d => d.id == req.params.id);
+    
+    if (index !== -1) {
+        // Merge existing data with the update from req.body
+        devices[index] = { ...devices[index], ...req.body };
+        res.json({ message: "Device updated", device: devices[index] });
+    } else {
+        res.status(404).json({ message: "Device not found" });
+    }
+});
+
+// DELETE – Remove a device
+router.delete('/:id', (req, res) => {
+    const initialLength = devices.length;
+    devices = devices.filter(d => d.id != req.params.id);
+    
+    if (devices.length < initialLength) {
+        res.json({ message: "Device deleted successfully" });
+    } else {
+        res.status(404).json({ message: "Device not found" });
+    }
+});
+
+module.exports = router;
 
